@@ -3,8 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wookie_movies_flutter_lrliwe/blocs/movie_bloc.dart';
 import 'package:wookie_movies_flutter_lrliwe/blocs/movie_state.dart';
 import 'package:wookie_movies_flutter_lrliwe/models/movie.dart';
+import 'package:wookie_movies_flutter_lrliwe/widgets/movies_genre.dart';
 import 'package:wookie_movies_flutter_lrliwe/themes/fonts.dart';
-import 'package:wookie_movies_flutter_lrliwe/widgets/movie_list.dart';
+import 'package:wookie_movies_flutter_lrliwe/widgets/movie_widget.dart';
 import 'package:wookie_movies_flutter_lrliwe/screens/movie_details.dart';
 import 'package:wookie_movies_flutter_lrliwe/themes/colors.dart';
 import 'package:wookie_movies_flutter_lrliwe/widgets/movie_search.dart';
@@ -39,15 +40,26 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.white,
-        title: const Text('Wookie Movies'),
+        title: const Align(
+          alignment: Alignment.centerLeft, // Aligns text to the left
+          child: Text(
+            'Wookie Movies',
+            style: TextStyle(
+              fontWeight: FontWeight.bold, // Makes text bold
+              fontSize: 20, // Adjust font size if needed
+            ),
+          ),
+        ),
       ),
       body: BlocBuilder<MovieBloc, MovieState>(
         builder: (context, state) {
           if (state is MovieLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is MovieLoaded) {
-            final movies = _searchController.text.isEmpty ? state.movies : _filteredMovies;
-            final uniqueGenres = movies.expand((m) => m.genres).toSet().toList();
+            final movies =
+                _searchController.text.isEmpty ? state.movies : _filteredMovies;
+            final uniqueGenres =
+                movies.expand((m) => m.genres).toSet().toList();
 
             return Column(
               children: [
@@ -64,7 +76,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemCount: uniqueGenres.length,
                     itemBuilder: (context, index) {
                       final genre = uniqueGenres[index];
-                      return _buildGenreSection(genre, movies, context, index != 0);
+                      return MoviesGenre(
+                        genre: genre,
+                        movies: movies,
+                        showDivider: index != 0,
+                        onMovieSelected: (selectedMovie) =>
+                            _navigateToDetails(context, selectedMovie),
+                      );
                     },
                   ),
                 ),
@@ -78,54 +96,6 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
     );
-  }
-
-  Widget _buildGenreSection(String genre, List<Movie> movies, BuildContext context, bool showDivider) {
-    final genreMovies = movies.where((m) => m.genres.contains(genre)).toList();
-
-    if (genreMovies.isNotEmpty) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (showDivider)
-            Divider(
-              color: AppColors.lightGrey.withOpacity(0.5),
-              thickness: 5,
-              height: 20,
-            ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              genre,
-              style: AppFonts.titleStyle,
-            ),
-          ),
-          SizedBox(
-            height: 200,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: genreMovies.length,
-              itemBuilder: (context, index) {
-                final movie = genreMovies[index];
-                return GestureDetector(
-                  onTap: () => _navigateToDetails(context, movie),
-                  child: SizedBox(
-                    width: 120,
-                    child: MovieList(
-                      movies: [movie],
-                      onMovieSelected: (selectedMovie) =>
-                          _navigateToDetails(context, selectedMovie),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      );
-    } else {
-      return const SizedBox.shrink();
-    }
   }
 
   void _navigateToDetails(BuildContext context, Movie movie) {

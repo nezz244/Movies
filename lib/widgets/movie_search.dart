@@ -20,27 +20,37 @@ class MovieSearch extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: TextField(
-        controller: searchController,
-        decoration: InputDecoration(
-          hintText: 'Search Movies',
-          filled: true,
-          fillColor: AppColors.lightGrey.withOpacity(0.5),
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
-          prefixIcon: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: AppIcons.searchIcon(),
-          ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.grey.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(40),
         ),
-        onChanged: (query) {
-          final movies = (BlocProvider.of<MovieBloc>(context).state as MovieLoaded).movies;
-          final filteredMovies = movies.where((movie) =>
-              movie.title.toLowerCase().contains(query.toLowerCase())
-          ).toList();
-          onMoviesFiltered(filteredMovies);
-        },
+        child: TextField(
+          controller: searchController,
+          decoration: InputDecoration(
+            hintText: 'Search Movies',
+            filled: true,
+            fillColor: AppColors.lightGrey.withOpacity(0.5),
+            border: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
+            prefixIcon: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: AppIcons.searchIcon(),
+            ),
+            contentPadding: const EdgeInsets.symmetric(vertical: 15),
+          ),
+          onChanged: (query) {
+            final movies =
+                (BlocProvider.of<MovieBloc>(context).state as MovieLoaded)
+                    .movies;
+            final filteredMovies = movies
+                .where((movie) =>
+                    movie.title.toLowerCase().contains(query.toLowerCase()))
+                .toList();
+            onMoviesFiltered(filteredMovies);
+          },
+        ),
       ),
     );
   }
